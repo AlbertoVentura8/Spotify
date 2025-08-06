@@ -1,0 +1,45 @@
+import spotipy
+from spotipy.oauth2 import SpotifyOAuth
+
+# Paso 1: Ve a https://developer.spotify.com/dashboard/
+# Paso 2: Crea una nueva aplicación o abre la que ya tengas.
+# Paso 3: En la configuración de la app, en "Redirect URIs", añade exactamente:
+#         http://127.0.0.1:8888/callback
+# Paso 4: Guarda los cambios.
+
+SPOTIPY_CLIENT_ID = "79bae11ba4e54c659a00d8df1cf09008"
+SPOTIPY_CLIENT_SECRET = "14fa4ec9a3fe4bf8870299a454b4dff6"
+SPOTIPY_REDIRECT_URI = "http://127.0.0.1:8888/callback"  # Usamos 127.0.0.1 en vez de localhost
+
+scope = "user-top-read user-read-recently-played"
+
+# Autenticación con Spotify
+sp = spotipy.Spotify(auth_manager=SpotifyOAuth(
+    client_id=SPOTIPY_CLIENT_ID,
+    client_secret=SPOTIPY_CLIENT_SECRET,
+    redirect_uri=SPOTIPY_REDIRECT_URI,
+    scope=scope
+))
+
+# Canciones más escuchadas
+top_tracks = sp.current_user_top_tracks(limit=20, time_range='long_term')
+print("Tus canciones más escuchadas:")
+for idx, item in enumerate(top_tracks['items']):
+    track_name = item['name']
+    artist_name = item['artists'][0]['name']
+    duration_ms = item['duration_ms']
+    duration_min = round(duration_ms / 60000, 2)
+    print(f"{idx+1}. {track_name} - {artist_name} ({duration_min} min)")
+
+# Artistas más escuchados
+top_artists = sp.current_user_top_artists(limit=10, time_range='long_term')
+print("\nTus artistas más escuchados:")
+for idx, artist in enumerate(top_artists['items']):
+    print(f"{idx+1}. {artist['name']}")
+
+# Historial reciente
+recent_tracks = sp.current_user_recently_played(limit=20)
+print("\nÚltimas canciones reproducidas:")
+for item in recent_tracks['items']:
+    track = item['track']
+    print(f"{track['name']} - {track['artists'][0]['name']}")
